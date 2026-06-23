@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://genesisgrid.xyz/agency/manifests/agency-asset.schema.json",
+  "title": "AgencyAssetManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assetId", "assetType", "title", "summary", "ownerAgent", "paths", "verification", "status"],
+  "properties": {
+    "assetId": { "type": "string", "pattern": "^asset_[a-z0-9_-]+$" },
+    "assetType": {
+      "type": "string",
+      "enum": ["skill", "agent", "playbook", "eval", "tool", "proof-artifact", "proposal", "doc"]
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 800 },
+    "ownerAgent": { "type": "string", "minLength": 1 },
+    "genesisGridTrialUrl": { "type": "string", "format": "uri" },
+    "paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "verification": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "externalValueHypothesis": { "type": "string", "maxLength": 2000 },
+    "status": { "type": "string", "enum": ["proposed", "accepted", "deprecated"] }
+  }
+}

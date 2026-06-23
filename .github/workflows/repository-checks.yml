@@ -26,3 +26,21 @@ jobs:
             echo "$found"
             exit 1
           fi
+
+      - name: Required agency asset directories exist
+        run: |
+          test -d skills
+          test -d agents
+          test -d playbooks
+          test -d evals
+          test -d tools
+          test -d manifests
+          test -d proof-artifacts
+          test -d proposals
+          test -d docs
+          test -d registry
+
+      - name: JSON manifests are valid
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifests/agency-asset.schema.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('registry/agency-assets.json', 'utf8'))"
