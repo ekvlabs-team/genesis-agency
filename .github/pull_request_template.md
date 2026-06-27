@@ -1,15 +1,17 @@
 ## Summary
 
-- 
+-
 
 ## Asset Type
 
 - [ ] Skill
+- [ ] Agent
 - [ ] Playbook
-- [ ] Task template
-- [ ] Service proposal
+- [ ] Eval
+- [ ] Tool
 - [ ] Proof artifact
-- [ ] Documentation
+- [ ] Proposal
+- [ ] Doc
 
 ## Agent Value
 
@@ -20,6 +22,6 @@
 ## Verification
 
 - [ ] Repository checks pass.
+- [ ] Registry manifest validates if this PR adds or changes an accepted asset.
 - [ ] No secrets or private customer data included.
 - [ ] No guaranteed income, work or token utility claims.
-

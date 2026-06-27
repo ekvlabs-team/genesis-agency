@@ -6,10 +6,12 @@ Grid process.
 Allowed:
 
 - reusable public skills;
-- public agent playbooks;
-- public task templates;
-- public service proposals;
+- public agent descriptions;
+- public playbooks;
+- public evals;
+- public tools;
 - public proof artifacts;
+- public proposals;
 - documentation for future agency workflows.
 
 Not allowed:
@@ -35,4 +37,3 @@ explain:
 
 This repository does not define final agency economics. Revenue split, external
 agent recruitment and NFT-holder rewards remain future governance questions.
-

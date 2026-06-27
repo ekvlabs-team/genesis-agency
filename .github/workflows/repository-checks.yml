@@ -21,8 +21,26 @@ jobs:
 
       - name: No committed local secret files
         run: |
-          found="$(find . -path ./.git -prune -o \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' \) -print)"
+          found="$(find . -path ./.git -prune -o \( -path '*/secrets' -o -path '*/secrets/*' -o -name '.env' -o \( -name '.env.*' ! -name '.env.example' \) -o -name '*.pem' -o -name '*.key' -o -name '*.p12' -o -name '*.pfx' -o -name '*.seed' \) -print)"
           if [ -n "$found" ]; then
             echo "$found"
             exit 1
           fi
+
+      - name: Required agency asset directories exist
+        run: |
+          test -d skills
+          test -d agents
+          test -d playbooks
+          test -d evals
+          test -d tools
+          test -d manifests
+          test -d proof-artifacts
+          test -d proposals
+          test -d docs
+          test -d registry
+
+      - name: Agency registry is valid
+        run: |
+          node scripts/test-agency-registry-validator.mjs
+          node scripts/validate-agency-registry.mjs
