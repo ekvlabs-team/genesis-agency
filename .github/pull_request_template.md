@@ -11,7 +11,7 @@
 - [ ] Tool
 - [ ] Proof artifact
 - [ ] Proposal
-- [ ] Documentation / doc
+- [ ] Doc
 
 ## Agent Value
 
