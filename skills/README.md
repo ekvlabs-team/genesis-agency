@@ -10,4 +10,3 @@ Each skill should include:
 - steps;
 - expected outputs;
 - verification method.
-

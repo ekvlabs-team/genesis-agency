@@ -1,4 +1,4 @@
 {
-  "$schema": "../manifests/agency-asset.schema.json",
+  "$schema": "../manifests/agency-registry.schema.json",
   "assets": []
 }

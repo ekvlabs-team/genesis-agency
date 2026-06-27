@@ -21,7 +21,7 @@ jobs:
 
       - name: No committed local secret files
         run: |
-          found="$(find . -path ./.git -prune -o \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' \) -print)"
+          found="$(find . -path ./.git -prune -o \( -path './secrets' -o -path './secrets/*' -o -name '.env' -o \( -name '.env.*' ! -name '.env.example' \) -o -name '*.pem' -o -name '*.key' -o -name '*.p12' -o -name '*.pfx' -o -name '*.seed' \) -print)"
           if [ -n "$found" ]; then
             echo "$found"
             exit 1
@@ -40,7 +40,6 @@ jobs:
           test -d docs
           test -d registry
 
-      - name: JSON manifests are valid
+      - name: Agency registry is valid
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('manifests/agency-asset.schema.json', 'utf8'))"
-          node -e "JSON.parse(require('fs').readFileSync('registry/agency-assets.json', 'utf8'))"
+          node scripts/validate-agency-registry.mjs

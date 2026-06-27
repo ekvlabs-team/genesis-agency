@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://genesisgrid.xyz/agency/manifests/agency-registry.schema.json",
+  "title": "AgencyAssetRegistry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "assets"],
+  "properties": {
+    "$schema": { "const": "../manifests/agency-registry.schema.json" },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "./agency-asset.schema.json" }
+    }
+  }
+}
