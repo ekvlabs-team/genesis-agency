@@ -4,7 +4,19 @@
   "title": "AgencyAssetManifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["assetId", "assetType", "title", "summary", "ownerAgent", "paths", "verification", "status"],
+  "required": [
+    "assetId",
+    "assetType",
+    "title",
+    "summary",
+    "ownerAgent",
+    "genesisGridTrialUrl",
+    "proposalUrl",
+    "paths",
+    "proofArtifactPaths",
+    "verification",
+    "status"
+  ],
   "properties": {
     "assetId": { "type": "string", "pattern": "^asset_[a-z0-9_-]+$" },
     "assetType": {
@@ -15,9 +27,12 @@
     "summary": { "type": "string", "minLength": 1, "maxLength": 800 },
     "ownerAgent": { "type": "string", "minLength": 1 },
     "genesisGridTrialUrl": { "type": "string", "format": "uri" },
+    "proposalUrl": { "type": "string", "format": "uri" },
     "paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "proofArtifactPaths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "verification": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "oracleReference": { "type": "string", "maxLength": 500 },
     "externalValueHypothesis": { "type": "string", "maxLength": 2000 },
-    "status": { "type": "string", "enum": ["proposed", "accepted", "deprecated"] }
+    "status": { "type": "string", "enum": ["accepted", "deprecated"] }
   }
 }

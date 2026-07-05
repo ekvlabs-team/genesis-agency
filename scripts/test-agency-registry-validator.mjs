@@ -9,9 +9,12 @@ const baseAsset = {
   title: "Alpha skill",
   summary: "Reusable public skill.",
   ownerAgent: "agent-alpha",
+  genesisGridTrialUrl: "https://genesisgrid.xyz/trial/app_alpha",
+  proposalUrl: "https://github.com/ekvlabs-team/genesis-agency/issues/2",
   paths: ["skills"],
+  proofArtifactPaths: ["proof-artifacts/asset_alpha"],
   verification: "Reviewed by repository checks.",
-  status: "proposed",
+  status: "accepted",
 };
 
 const validRegistry = {
@@ -19,7 +22,7 @@ const validRegistry = {
   assets: [baseAsset],
 };
 
-const existingPaths = new Set(["skills"]);
+const existingPaths = new Set(["skills", "proof-artifacts/asset_alpha"]);
 
 assert.deepEqual(validate(validRegistry), []);
 assert.match(validate({ ...validRegistry, notes: "extra" })[0], /unknown field: notes/);
@@ -37,7 +40,7 @@ assert.match(validate({
 assert.match(validate({
   ...validRegistry,
   assets: [{ ...baseAsset, paths: [42] }],
-})[0], /path 0 must be a string/);
+})[0], /field paths item 0 must be a string/);
 assert.match(validate({
   ...validRegistry,
   assets: [{ ...baseAsset, title: "" }],
@@ -46,6 +49,42 @@ assert.match(validate({
   ...validRegistry,
   assets: [{ ...baseAsset, genesisGridTrialUrl: "not a url" }],
 })[0], /genesisGridTrialUrl must be a URI/);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, status: "proposed" }],
+})[0], /status must be one of: accepted, deprecated/);
+const assetWithoutProposalUrl = { ...baseAsset };
+delete assetWithoutProposalUrl.proposalUrl;
+assert.match(validate({
+  ...validRegistry,
+  assets: [assetWithoutProposalUrl],
+})[0], /missing required field: proposalUrl/);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, proofArtifactPaths: [] }],
+})[0], /field proofArtifactPaths must contain at least 1 item/);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, proofArtifactPaths: ["../../tmp/secret"] }],
+})[0], /proofArtifactPaths 0 escapes repository root/);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, proofArtifactPaths: ["proof-artifacts/../skills"] }],
+})[0], /proofArtifactPaths 0 must be under proof-artifacts\//);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, assetType: "tool" }],
+})[0], /assetType tool must reference at least one path under tools/);
+assert.match(validate({
+  ...validRegistry,
+  assets: [{ ...baseAsset, assetType: "tool", paths: ["tools/../skills"] }],
+})[0], /assetType tool must reference at least one path under tools/);
+const deprecatedAssetWithoutProof = { ...baseAsset, status: "deprecated" };
+delete deprecatedAssetWithoutProof.proofArtifactPaths;
+assert.match(validate({
+  ...validRegistry,
+  assets: [deprecatedAssetWithoutProof],
+})[0], /missing required field: proofArtifactPaths/);
 
 console.log("Agency registry validator tests passed");
 
@@ -63,7 +102,19 @@ function validate(registry) {
     },
     assetSchema: {
       additionalProperties: false,
-      required: ["assetId", "assetType", "title", "summary", "ownerAgent", "paths", "verification", "status"],
+      required: [
+        "assetId",
+        "assetType",
+        "title",
+        "summary",
+        "ownerAgent",
+        "genesisGridTrialUrl",
+        "proposalUrl",
+        "paths",
+        "proofArtifactPaths",
+        "verification",
+        "status",
+      ],
       properties: {
         assetId: { type: "string", pattern: "^asset_[a-z0-9_-]+$" },
         assetType: { type: "string", enum: ["skill", "agent", "playbook", "eval", "tool", "proof-artifact", "proposal", "doc"] },
@@ -74,7 +125,9 @@ function validate(registry) {
         paths: { type: "array", items: { type: "string" }, minItems: 1 },
         verification: { type: "string", minLength: 1, maxLength: 2000 },
         externalValueHypothesis: { type: "string", maxLength: 2000 },
-        status: { type: "string", enum: ["proposed", "accepted", "deprecated"] },
+        proposalUrl: { type: "string", format: "uri" },
+        proofArtifactPaths: { type: "array", items: { type: "string" }, minItems: 1 },
+        status: { type: "string", enum: ["accepted", "deprecated"] },
       },
     },
     root: "/repo",

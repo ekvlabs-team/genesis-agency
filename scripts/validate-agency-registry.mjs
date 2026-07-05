@@ -6,6 +6,16 @@ import { fileURLToPath } from "node:url";
 const modulePath = fileURLToPath(import.meta.url);
 const root = dirname(dirname(modulePath));
 const registrySchemaRef = "../manifests/agency-registry.schema.json";
+const assetTypeRoot = new Map([
+  ["skill", "skills"],
+  ["agent", "agents"],
+  ["playbook", "playbooks"],
+  ["eval", "evals"],
+  ["tool", "tools"],
+  ["proof-artifact", "proof-artifacts"],
+  ["proposal", "proposals"],
+  ["doc", "docs"],
+]);
 
 export function validateAgencyRegistry({
   registry,
@@ -73,25 +83,70 @@ export function validateAgencyRegistry({
 
     if (Array.isArray(asset.paths)) {
       asset.paths.forEach((relativePath, pathIndex) => {
-        if (typeof relativePath !== "string") {
-          errors.push(`registry asset ${index} path ${pathIndex} must be a string`);
-          return;
-        }
+        validateRepositoryPath(errors, {
+          rootPath,
+          pathExists,
+          label: `registry asset ${index} path ${pathIndex}`,
+          relativePath,
+        });
+      });
+    }
 
-        const absolutePath = resolve(rootPath, relativePath);
-        if (!isWithinRoot(rootPath, absolutePath)) {
-          errors.push(`registry asset ${index} path ${pathIndex} escapes repository root: ${relativePath}`);
-          return;
-        }
-
-        if (!pathExists(absolutePath)) {
-          errors.push(`registry asset ${index} references missing path: ${relativePath}`);
+    if (Array.isArray(asset.proofArtifactPaths)) {
+      asset.proofArtifactPaths.forEach((relativePath, pathIndex) => {
+        validateRepositoryPath(errors, {
+          rootPath,
+          pathExists,
+          label: `registry asset ${index} proofArtifactPaths ${pathIndex}`,
+          relativePath,
+        });
+        if (typeof relativePath === "string" && !isPathUnderDirectory(rootPath, relativePath, "proof-artifacts")) {
+          errors.push(
+            `registry asset ${index} proofArtifactPaths ${pathIndex} must be under proof-artifacts/: ${relativePath}`,
+          );
         }
       });
     }
+
+    validateAssetGovernance(errors, { asset, index, rootPath });
   });
 
   return errors;
+}
+
+function validateRepositoryPath(errors, { rootPath, pathExists, label, relativePath }) {
+  if (typeof relativePath !== "string") {
+    errors.push(`${label} must be a string`);
+    return;
+  }
+
+  const absolutePath = resolve(rootPath, relativePath);
+  if (!isWithinRoot(rootPath, absolutePath)) {
+    errors.push(`${label} escapes repository root: ${relativePath}`);
+    return;
+  }
+
+  if (!pathExists(absolutePath)) {
+    errors.push(`${label.replace(/ path \d+$/, "")} references missing path: ${relativePath}`);
+  }
+}
+
+function validateAssetGovernance(errors, { asset, index, rootPath }) {
+  const assetId = typeof asset.assetId === "string" ? asset.assetId : `index ${index}`;
+  const expectedRoot = assetTypeRoot.get(asset.assetType);
+  if (expectedRoot && Array.isArray(asset.paths) && !asset.paths.some((path) => isPathUnderDirectory(rootPath, path, expectedRoot))) {
+    errors.push(`registry asset ${index} assetType ${asset.assetType} must reference at least one path under ${expectedRoot}/`);
+  }
+
+  if (!asset.genesisGridTrialUrl) {
+    errors.push(`registry asset ${assetId} must include genesisGridTrialUrl`);
+  }
+  if (!asset.proposalUrl) {
+    errors.push(`registry asset ${assetId} must include proposalUrl`);
+  }
+  if (!Array.isArray(asset.proofArtifactPaths) || asset.proofArtifactPaths.length === 0) {
+    errors.push(`registry asset ${assetId} must include at least one proofArtifactPaths entry`);
+  }
 }
 
 function validateField(errors, asset, index, field, rule) {
@@ -125,6 +180,13 @@ function validateField(errors, asset, index, field, rule) {
   if (Array.isArray(value) && rule.minItems !== undefined && value.length < rule.minItems) {
     errors.push(`registry asset ${index} field ${field} must contain at least ${rule.minItems} item`);
   }
+  if (Array.isArray(value) && rule.items?.type) {
+    value.forEach((item, itemIndex) => {
+      if (rule.items.type === "string" && typeof item !== "string") {
+        errors.push(`registry asset ${index} field ${field} item ${itemIndex} must be a string`);
+      }
+    });
+  }
 
   if (rule.enum && !rule.enum.includes(value)) {
     errors.push(`registry asset ${index} field ${field} must be one of: ${rule.enum.join(", ")}`);
@@ -142,6 +204,14 @@ function isUri(value) {
 
 function isWithinRoot(rootPath, candidatePath) {
   return candidatePath === rootPath || candidatePath.startsWith(`${rootPath}${sep}`);
+}
+
+function isPathUnderDirectory(rootPath, relativePath, directory) {
+  if (typeof relativePath !== "string") return false;
+  const candidatePath = resolve(rootPath, relativePath);
+  const directoryPath = resolve(rootPath, directory);
+  if (!isWithinRoot(rootPath, candidatePath)) return false;
+  return candidatePath === directoryPath || candidatePath.startsWith(`${directoryPath}${sep}`);
 }
 
 function readJson(relativePath) {

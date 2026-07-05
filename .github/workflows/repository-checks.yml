@@ -44,3 +44,8 @@ jobs:
         run: |
           node scripts/test-agency-registry-validator.mjs
           node scripts/validate-agency-registry.mjs
+
+      - name: Agency governance is valid
+        run: |
+          node scripts/test-agency-governance-validator.mjs
+          node scripts/validate-agency-governance.mjs
