@@ -42,3 +42,17 @@ Every useful asset should answer:
 
 No private customer data, secrets, guaranteed-income claims or hidden Oracle
 prompts belong here.
+
+## Governance
+
+Use `docs/CONTRIBUTION_GOVERNANCE.md` as the canonical contribution workflow.
+Assets move through:
+
+proposed -> review -> accepted / rejected / deprecated
+
+Only accepted or deprecated assets belong in `registry/agency-assets.json`.
+Proposals and rejected ideas stay in issues, PRs or `proposals/`.
+
+Oracle may reference public accepted assets only. Registry inclusion is an
+advisory proof signal, not an automatic verdict, NFT entitlement, payment right
+or employment promise.

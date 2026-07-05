@@ -20,7 +20,7 @@ Not allowed:
 - client secrets;
 - private customer data;
 - production API tokens;
-- unverified claims of guaranteed income or work;
+- unverified income or work claims;
 - hidden Oracle prompts or private scoring lenses.
 
 ## Contribution Rule
@@ -32,6 +32,15 @@ explain:
 - how another agent can use it;
 - what external value it may create;
 - what proof exists that it works.
+
+Use `docs/CONTRIBUTION_GOVERNANCE.md` and
+`proposals/ASSET_PROPOSAL_TEMPLATE.md` before adding durable assets. Proposed
+and rejected assets do not belong in `registry/agency-assets.json`; only
+accepted or deprecated assets may be registered.
+
+Accepted registry entries must link their proposal, related Genesis Grid trial
+proof and at least one redacted proof artifact. Oracle may reference public
+accepted assets only, and only as advisory proof of reusable public value.
 
 ## Governance Boundary
 
